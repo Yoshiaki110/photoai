@@ -69,16 +69,20 @@ model = InceptionResNetV2(weights='imagenet', include_top=False)
 #save(DTFILE)
 
 for fname in [
-    './cafune_photostudio/test/2022-01-05_10-25-01_UTC.jpg',
-    './cafune_photostudio/test/2022-03-21_10-03-16_UTC_2.jpg',
-    './cocoanoborito/test/2022-03-06_01-55-55_UTC_1.jpg',
-    './cocoanoborito/test/2022-03-17_04-05-31_UTC.jpg',
-    './holidaysphotoservice/test/2022-01-30_00-57-20_UTC_2.jpg',
-    './holidaysphotoservice/test/2022-02-13_23-37-57_UTC_3.jpg',
-    './mitulle_studio/test/2022-03-03_08-05-24_UTC_1.jpg',
-    './mitulle_studio/test/2022-03-03_08-05-24_UTC_3.jpg',
-    './photostudiochelsea2524/test/2022-02-20_12-53-23_UTC_6.jpg',
-    './photostudiochelsea2524/test/2022-03-14_14-36-49_UTC_3.jpg',
+    './static/studios/studiococoahitachi/2022-04-11_08-38-49_UTC_4.webp',
+    './static/studios/studiococoahitachi/2022-04-10_10-27-51_UTC_1.webp',
+    #'./static/studios/photostudiochelsea2524/2022-03-14_14-36-49_UTC_1.webp',
+    #'./static/studios/photostudiochelsea2524/2022-03-14_14-36-49_UTC_6.webp',
+    #'./cafune_photostudio/test/2022-01-05_10-25-01_UTC.jpg',
+    #'./cafune_photostudio/test/2022-03-21_10-03-16_UTC_2.jpg',
+    #'./cocoanoborito/test/2022-03-06_01-55-55_UTC_1.jpg',
+    #'./cocoanoborito/test/2022-03-17_04-05-31_UTC.jpg',
+    #'./holidaysphotoservice/test/2022-01-30_00-57-20_UTC_2.jpg',
+    #'./holidaysphotoservice/test/2022-02-13_23-37-57_UTC_3.jpg',
+    #'./mitulle_studio/test/2022-03-03_08-05-24_UTC_1.jpg',
+    #'./mitulle_studio/test/2022-03-03_08-05-24_UTC_3.jpg',
+    #'./photostudiochelsea2524/test/2022-02-20_12-53-23_UTC_6.jpg',
+    #'./photostudiochelsea2524/test/2022-03-14_14-36-49_UTC_3.jpg',
 ]:
     # 解析データを保存
     feature = get_feature(fname)

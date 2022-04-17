@@ -1,11 +1,11 @@
-from flask import Flask, render_template, make_response, jsonify
+from dis import dis
+from flask import Flask, request, render_template, make_response, jsonify
 from flask_cors import CORS
 from keras.preprocessing import image
 from keras.applications.inception_resnet_v2 import InceptionResNetV2, preprocess_input, decode_predictions
 import numpy as np
 import pickle
 import os
-import random
 
 DTFILE = 'data.dat'
 
@@ -45,6 +45,14 @@ def get_nearest(feature_list, feature):
             min_dist = dist
             name = n
     return name, min_dist
+
+def get_nearlist(feature_list, feature):
+    list = []
+    for n, v in feature_list:
+        dist = np.sum((v-feature)*(v-feature))
+        list.append([n, int(dist)])
+    list.sort(reverse=False, key=lambda x:x[1])
+    return list[:10]
 
 # 画像リスト作成
 def makelist(feature_list):
@@ -97,6 +105,24 @@ def root():
 @app.route('/index.html')
 def index():
     return render_template('index.html')
+
+@app.route("/api/similar", methods=['POST'])
+def api_similar():
+    print("** /api/similar start")
+    img = request.files['image']
+    name = img.filename
+    fname = os.path.join('./', name)
+    img.save(fname)
+    # 解析データを保存
+    feature = get_feature(fname)
+    # 確認
+    #name, dist = get_nearest(feature_list, feature)
+    list = get_nearlist(feature_list, feature)
+    print("** /api/similar end")
+
+    #return jsonify({'data': {'name': name, 'dist': int(dist)}})
+    #return jsonify({'data': list})
+    return jsonify(list)
 
 # 写真情報の取得
 @app.route("/api", methods=['GET'])

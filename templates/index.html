@@ -3,9 +3,75 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <title>photoai</title>
 </head>
 <body>
   <h1>photoai</h1>
+  <div class="card" style="width:15rem;">
+
+    <canvas id="canvas" class="img-fluid"></canvas>
+    <input type="file" class="form-control-file" id="image" />
+    <button class="btn btn-primary btn-block" id="pict-btn" disabled>写真の決定</button>
+
+  </div>
+  <script>
+
+    // 写真選択ページ
+    document.getElementById("image").addEventListener("change", function(e) {
+      document.getElementById("pict-btn").disabled = false;    // 決定ボタン有効化
+      var file = e.target.files;
+      var reader = new FileReader();
+      reader.readAsDataURL(file[0]);
+      reader.onload = function() {        // 画像選択したら
+        var source = reader.result;
+        drawImage(reader.result);         // 選択した画像を表示
+        //api();
+      }
+    }, false);
+
+    // 選択した画像を表示
+    function drawImage(src) {
+      var canvas = document.getElementById("canvas")
+      var context = canvas.getContext('2d')
+      var image = new Image()
+      image.src = src;
+      image.onload = function() {
+        canvas.width = image.width;
+        canvas.height = image.height;
+        context.drawImage(image, 0, 0)
+//        canvas.width = 640;
+//        canvas.height = 480;
+//        context.drawImage(image, 0, 0, 640, 480)
+      }
+    }
+
+    // 写真選択ページ
+    document.getElementById("pict-btn").addEventListener("click", function(e) {
+      document.getElementById("pict-btn").disabled = true;      // 決定ボタン無効化
+      var params = new FormData();
+      var file = document.getElementById("image").files[0];
+      params.append('image', file);
+      // 顔の位置を取得
+      axios.post('/api/similar', params).then(function(response) {
+        dt = response.data;
+        var i = 0;
+        if (dt.length) {
+        } else {
+          alert("データ取得できません");
+        }
+        document.getElementById("pict-btn").disabled = false;    // 決定ボタン有効化
+      }).catch(function(error) {
+        alert("エラー:" + error);
+        document.getElementById("pict-btn").disabled = false;    // 決定ボタン有効化
+      });
+    }, false);
+
+
+  </script>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 </body>
 </html>
