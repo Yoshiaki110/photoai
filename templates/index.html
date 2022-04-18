@@ -8,40 +8,44 @@
 <body>
   <h1>AIスタジオアドバイザー</h1>
   似たような雰囲気を撮影するスタジオをAIで調べます
-    <div id="drop-zone" style="border: 1px solid; padding: 30px;">
+    <div id="drop-zone" style="border: 1px solid; padding: 30px;display:block;">
       <p>ここに画像ファイルをドラッグ＆ドロップもしくは</p>
       <input type="file" name="file" id="file-input">
       <p />
       <div id="preview"></div>
       <div id="retult-msg"></div>
     </div>
+    <div id="in-process" style="border: 1px solid; padding: 30px;display:none;">
+      <h2><center>少々時間がかかります</center></h2>
+    </div>
 
-<script type="text/javascript">
-      const STABLE = {
-        'mitulle_studio'         : ['PhotoStudioミチュール 月島店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/TFz2yEj8SMaveK6WlNsd', 'PhotoStudioミチュール 有明ガーデン店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/eUE0rDl8FvbmBMLciIJq'],
-        'mitullephoto'           : ['PhotoStudioミチュール 月島ウォーターフロント店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/w94Ej1I6neuQplSRtGTD'],
-        'holidaysphotoservice'   : ['Holidays PhotoService', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/IQshrHKab7uPNtZqO1xY'],
-        'studiococoahitachi'     : ['スタジオCocoa 日立店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/yDnS0v6kYrlZTJKaIzum'],
-        'studiococoamito'        : ['スタジオCocoa 水戸店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/KjOT6loq1HJh52NeAwg3'],
-        'studiococoatsukuba'     : ['スタジオCocoa つくば店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/4yu9DjlYarJCgw6ESLo5'],
-        'studiococoakashiwa'     : ['スタジオCocoa 柏マルイ店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/proF2gKqWERa98OI47nY'],
-        'cocoainzai'             : ['スタジオCocoa 印西店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/VQup73vkfyHGsrODPKTX'],
-        'cocoatokyofutakotamagawa'   : ['スタジオCocoa 東京二子玉川店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/OMQBI2h9uWzxZjJykSCX'],
-        'cocoanoborito'          : ['スタジオCocoa 川崎登戸店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/hZDqtj8cVeN17TvxpHJf'],
-        'cocoashinkawasaki'      : ['スタジオCocoa 新川崎店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/wnmIkQa1vGq3chTp4t0j'],
-        'studiococoakohoku'      : ['スタジオCocoa 横浜港北店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/jvW2YkXuL0n614NSczIM'],
-        'cocoashinyokohama'      : ['スタジオCocoa 新横浜店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/1pTycokFS7LiPwl4EIJV'],
-        'cocoayokohamakonan'     : ['スタジオCocoa 横浜港南店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/l7EI61v9qJS3VKFPfdzx'],
-        'cocoayokohamatotsuka'   : ['スタジオCocoa 横浜戸塚店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/vpx8Pg0iorFGKqYjX9JC'],
-        'studiococoayamate'      : ['スタジオCocoa 横浜山手店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/H5a6ly4nKU8XTA3c9Cos'],
-        'adamasnewbornphoto'     : ['AdAmAs newborn photo', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/VYsNBtHZTIWJLQXh1mxR'],
-        'photostudiochelsea2524' : ['フォトスタジオチェルシー', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/15cDE0peYIGwPhFMg8Xt'],
-        'cafune_photostudio'     : ['Photo studio CAFUNÉ　カフネ ', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/WDc789dJ3BGQMsZFrtAx'],
-      }
+  <script type="text/javascript">
+    const STABLE = {
+      'mitulle_studio'         : ['PhotoStudioミチュール 月島店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/TFz2yEj8SMaveK6WlNsd', 'PhotoStudioミチュール 有明ガーデン店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/eUE0rDl8FvbmBMLciIJq'],
+      'mitullephoto'           : ['PhotoStudioミチュール 月島ウォーターフロント店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/w94Ej1I6neuQplSRtGTD'],
+      'holidaysphotoservice'   : ['Holidays PhotoService', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/IQshrHKab7uPNtZqO1xY'],
+      'studiococoahitachi'     : ['スタジオCocoa 日立店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/yDnS0v6kYrlZTJKaIzum'],
+      'studiococoamito'        : ['スタジオCocoa 水戸店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/KjOT6loq1HJh52NeAwg3'],
+      'studiococoatsukuba'     : ['スタジオCocoa つくば店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/4yu9DjlYarJCgw6ESLo5'],
+      'studiococoakashiwa'     : ['スタジオCocoa 柏マルイ店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/proF2gKqWERa98OI47nY'],
+      'cocoainzai'             : ['スタジオCocoa 印西店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/VQup73vkfyHGsrODPKTX'],
+      'cocoatokyofutakotamagawa'   : ['スタジオCocoa 東京二子玉川店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/OMQBI2h9uWzxZjJykSCX'],
+      'cocoanoborito'          : ['スタジオCocoa 川崎登戸店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/hZDqtj8cVeN17TvxpHJf'],
+      'cocoashinkawasaki'      : ['スタジオCocoa 新川崎店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/wnmIkQa1vGq3chTp4t0j'],
+      'studiococoakohoku'      : ['スタジオCocoa 横浜港北店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/jvW2YkXuL0n614NSczIM'],
+      'cocoashinyokohama'      : ['スタジオCocoa 新横浜店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/1pTycokFS7LiPwl4EIJV'],
+      'cocoayokohamakonan'     : ['スタジオCocoa 横浜港南店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/l7EI61v9qJS3VKFPfdzx'],
+      'cocoayokohamatotsuka'   : ['スタジオCocoa 横浜戸塚店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/vpx8Pg0iorFGKqYjX9JC'],
+      'studiococoayamate'      : ['スタジオCocoa 横浜山手店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/H5a6ly4nKU8XTA3c9Cos'],
+      'adamasnewbornphoto'     : ['AdAmAs newborn photo', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/VYsNBtHZTIWJLQXh1mxR'],
+      'photostudiochelsea2524' : ['フォトスタジオチェルシー', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/15cDE0peYIGwPhFMg8Xt'],
+      'cafune_photostudio'     : ['Photo studio CAFUNÉ　カフネ ', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/WDc789dJ3BGQMsZFrtAx'],
+    }
 
     const dropZone = document.getElementById('drop-zone');
     const preview = document.getElementById('preview');
     const fileInput = document.getElementById('file-input');
+    const inProcess = document.getElementById('in-process');
 
     // ドラッグ領域に入ったら、背景に色をを付ける
     dropZone.addEventListener('dragover', function(e) {
@@ -71,6 +75,17 @@
         previewFile(files[0]);
         api(files[0]);
     }, false);
+
+    // 実行中
+    function processing(f) {
+      if (f) {
+        dropZone.style.display = "none";
+        inProcess.style.display = "block";
+      } else {
+        dropZone.style.display = "block";
+        inProcess.style.display = "none";
+      }
+    }
     // 画像表示
     function previewFile(file) {
         /* FileReaderで読み込み、プレビュー画像を表示。 */
@@ -86,6 +101,7 @@
     }
     // API
     function api(file) {
+      processing(true);
       var params = new FormData();
       //var file = document.getElementById("file-input").files[0];
       params.append('image', file);
@@ -124,15 +140,18 @@
           }
 
           document.getElementById("retult-msg").innerHTML = retultmsg;
+          processing(false);
         } else {
           alert("データ取得できません");
+          processing(false);
         }
       }).catch(function(error) {
         alert("エラー:" + error);
+        processing(false);
       });
   
     }
-</script>
+  </script>
 
 </body>
 </html>
