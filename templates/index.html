@@ -1,77 +1,139 @@
-<!DOCTYPE HTML>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <title>photoai</title>
+  <title>AIスタジオアドバイザー</title>
 </head>
 <body>
-  <h1>photoai</h1>
-  <div class="card" style="width:15rem;">
+  <h1>AIスタジオアドバイザー</h1>
+  似たような雰囲気を撮影するスタジオをAIで調べます
+    <div id="drop-zone" style="border: 1px solid; padding: 30px;">
+      <p>ここに画像ファイルをドラッグ＆ドロップもしくは</p>
+      <input type="file" name="file" id="file-input">
+      <p />
+      <div id="preview"></div>
+      <div id="retult-msg"></div>
+    </div>
 
-    <canvas id="canvas" class="img-fluid"></canvas>
-    <input type="file" class="form-control-file" id="image" />
-    <button class="btn btn-primary btn-block" id="pict-btn" disabled>写真の決定</button>
-
-  </div>
-  <script>
-
-    // 写真選択ページ
-    document.getElementById("image").addEventListener("change", function(e) {
-      document.getElementById("pict-btn").disabled = false;    // 決定ボタン有効化
-      var file = e.target.files;
-      var reader = new FileReader();
-      reader.readAsDataURL(file[0]);
-      reader.onload = function() {        // 画像選択したら
-        var source = reader.result;
-        drawImage(reader.result);         // 選択した画像を表示
-        //api();
+<script type="text/javascript">
+      const STABLE = {
+        'mitulle_studio'         : ['PhotoStudioミチュール 月島店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/TFz2yEj8SMaveK6WlNsd', 'PhotoStudioミチュール 有明ガーデン店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/eUE0rDl8FvbmBMLciIJq'],
+        'mitullephoto'           : ['PhotoStudioミチュール 月島ウォーターフロント店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/w94Ej1I6neuQplSRtGTD'],
+        'holidaysphotoservice'   : ['Holidays PhotoService', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/IQshrHKab7uPNtZqO1xY'],
+        'studiococoahitachi'     : ['スタジオCocoa 日立店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/yDnS0v6kYrlZTJKaIzum'],
+        'studiococoamito'        : ['スタジオCocoa 水戸店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/KjOT6loq1HJh52NeAwg3'],
+        'studiococoatsukuba'     : ['スタジオCocoa つくば店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/4yu9DjlYarJCgw6ESLo5'],
+        'studiococoakashiwa'     : ['スタジオCocoa 柏マルイ店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/proF2gKqWERa98OI47nY'],
+        'cocoainzai'             : ['スタジオCocoa 印西店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/VQup73vkfyHGsrODPKTX'],
+        'cocoatokyofutakotamagawa'   : ['スタジオCocoa 東京二子玉川店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/OMQBI2h9uWzxZjJykSCX'],
+        'cocoanoborito'          : ['スタジオCocoa 川崎登戸店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/hZDqtj8cVeN17TvxpHJf'],
+        'cocoashinkawasaki'      : ['スタジオCocoa 新川崎店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/wnmIkQa1vGq3chTp4t0j'],
+        'studiococoakohoku'      : ['スタジオCocoa 横浜港北店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/jvW2YkXuL0n614NSczIM'],
+        'cocoashinyokohama'      : ['スタジオCocoa 新横浜店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/1pTycokFS7LiPwl4EIJV'],
+        'cocoayokohamakonan'     : ['スタジオCocoa 横浜港南店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/l7EI61v9qJS3VKFPfdzx'],
+        'cocoayokohamatotsuka'   : ['スタジオCocoa 横浜戸塚店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/vpx8Pg0iorFGKqYjX9JC'],
+        'studiococoayamate'      : ['スタジオCocoa 横浜山手店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/H5a6ly4nKU8XTA3c9Cos'],
+        'adamasnewbornphoto'     : ['AdAmAs newborn photo', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/VYsNBtHZTIWJLQXh1mxR'],
+        'photostudiochelsea2524' : ['フォトスタジオチェルシー', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/15cDE0peYIGwPhFMg8Xt'],
+        'cafune_photostudio'     : ['Photo studio CAFUNÉ　カフネ ', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/WDc789dJ3BGQMsZFrtAx'],
       }
+
+    const dropZone = document.getElementById('drop-zone');
+    const preview = document.getElementById('preview');
+    const fileInput = document.getElementById('file-input');
+
+    // ドラッグ領域に入ったら、背景に色をを付ける
+    dropZone.addEventListener('dragover', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.style.background = '#e1e7f0';
     }, false);
-
-    // 選択した画像を表示
-    function drawImage(src) {
-      var canvas = document.getElementById("canvas")
-      var context = canvas.getContext('2d')
-      var image = new Image()
-      image.src = src;
-      image.onload = function() {
-        canvas.width = image.width;
-        canvas.height = image.height;
-        context.drawImage(image, 0, 0)
-//        canvas.width = 640;
-//        canvas.height = 480;
-//        context.drawImage(image, 0, 0, 640, 480)
-      }
+    // ドラッグ領域を離れたら、背景は白にする
+    dropZone.addEventListener('dragleave', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.style.background = '#ffffff';
+    }, false);
+    // ファイル選択したら
+    fileInput.addEventListener('change', function () {
+        previewFile(this.files[0]);
+        api(this.files[0]);
+    });
+    // ドロップしたら
+    dropZone.addEventListener('drop', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.style.background = '#ffffff'; // 背景色を白に戻す
+        var files = e.dataTransfer.files;  // ドロップしたファイルを取得
+        if (files.length > 1) return alert('アップロードできるファイルは1つだけです。');
+        fileInput.files = files;           // inputのvalueをドラッグしたファイルに置き換える。
+        previewFile(files[0]);
+        api(files[0]);
+    }, false);
+    // 画像表示
+    function previewFile(file) {
+        /* FileReaderで読み込み、プレビュー画像を表示。 */
+        var fr = new FileReader();
+        fr.readAsDataURL(file);
+        fr.onload = function() {
+            var img = document.createElement('img');
+            img.width = document.body.clientWidth - 70;
+            img.setAttribute('src', fr.result);
+            preview.innerHTML = '';
+            preview.appendChild(img);
+        };
     }
-
-    // 写真選択ページ
-    document.getElementById("pict-btn").addEventListener("click", function(e) {
-      document.getElementById("pict-btn").disabled = true;      // 決定ボタン無効化
+    // API
+    function api(file) {
       var params = new FormData();
-      var file = document.getElementById("image").files[0];
+      //var file = document.getElementById("file-input").files[0];
       params.append('image', file);
-      // 顔の位置を取得
+      // API呼び出し
       axios.post('/api/similar', params).then(function(response) {
         dt = response.data;
         var i = 0;
         if (dt.length) {
+          sum = {};
+          for (var i = 0; i < dt.length; i++) {
+            studio = dt[i][0];
+            if (studio in sum) {
+              sum[studio] += 10 - i
+            } else {
+              sum[studio] = 10 - i
+            }
+          }
+          // キーを含んだ配列に変換 オブジェクト⇒配列
+          var arr = Object.keys(sum).map((k)=>({ key: k, value: sum[k] }));
+          // スコア順
+          arr.sort((a, b) => b.value - a.value);
+          var retultmsg = "<h3>調査結果</h3>";
+          var i = 0;
+          for (var item of arr) {
+            ++i;
+            console.log(item.key, item.value);
+            if (item.value < 9) {
+              break;
+            }
+            if (STABLE[item.key].length == 2) {
+              retultmsg += '<a href="' + STABLE[item.key][1] + '">' + i + ' ' + STABLE[item.key][0] + '</a><br />';
+            } else {
+              retultmsg += '<a href="' + STABLE[item.key][1] + '">' + i + ' ' + STABLE[item.key][0] + '</a><br />';
+              retultmsg += '<a href="' + STABLE[item.key][3] + '">' + STABLE[item.key][2] + '</a><br />';
+            }
+          }
+
+          document.getElementById("retult-msg").innerHTML = retultmsg;
         } else {
           alert("データ取得できません");
         }
-        document.getElementById("pict-btn").disabled = false;    // 決定ボタン有効化
       }).catch(function(error) {
         alert("エラー:" + error);
-        document.getElementById("pict-btn").disabled = false;    // 決定ボタン有効化
       });
-    }, false);
+  
+    }
+</script>
 
-
-  </script>
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 </body>
 </html>
+
