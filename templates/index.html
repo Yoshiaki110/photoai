@@ -8,15 +8,15 @@
 <body>
   <h1>AIスタジオアドバイザー</h1>
   似たような雰囲気を撮影するスタジオをAIで調べます
-    <div id="drop-zone" style="border: 1px solid; padding: 30px;display:block;">
+    <div id="drop-zone" style="border: 1px solid; padding: 30px;">
       <p>ここに画像ファイルをドラッグ＆ドロップもしくは</p>
       <input type="file" name="file" id="file-input">
       <p />
+      <div id="in-process" style="display:none;">
+        <h3><center style="color:white">少々時間がかかります</center></h3>
+      </div>
       <div id="preview"></div>
       <div id="retult-msg"></div>
-    </div>
-    <div id="in-process" style="border: 1px solid; padding: 30px;display:none;">
-      <h2><center>少々時間がかかります</center></h2>
     </div>
 
   <script type="text/javascript">
@@ -49,23 +49,30 @@
 
     // ドラッグ領域に入ったら、背景に色をを付ける
     dropZone.addEventListener('dragover', function(e) {
+      if (!fileInput.disabled) {
         e.stopPropagation();
         e.preventDefault();
         this.style.background = '#e1e7f0';
+      }
     }, false);
     // ドラッグ領域を離れたら、背景は白にする
     dropZone.addEventListener('dragleave', function(e) {
+      if (!fileInput.disabled) {
         e.stopPropagation();
         e.preventDefault();
         this.style.background = '#ffffff';
+      }
     }, false);
     // ファイル選択したら
     fileInput.addEventListener('change', function () {
+      if (!fileInput.disabled) {
         previewFile(this.files[0]);
         api(this.files[0]);
+      }
     });
     // ドロップしたら
     dropZone.addEventListener('drop', function(e) {
+      if (!fileInput.disabled) {
         e.stopPropagation();
         e.preventDefault();
         this.style.background = '#ffffff'; // 背景色を白に戻す
@@ -74,30 +81,36 @@
         fileInput.files = files;           // inputのvalueをドラッグしたファイルに置き換える。
         previewFile(files[0]);
         api(files[0]);
+      }
     }, false);
 
     // 実行中
     function processing(f) {
       if (f) {
-        dropZone.style.display = "none";
+        document.body.style.background = '#616770';
+        dropZone.style.background = '#616770';
         inProcess.style.display = "block";
+        fileInput.disabled = true;
       } else {
-        dropZone.style.display = "block";
+        document.body.style.background = '#ffffff';
+        dropZone.style.background = '#ffffff';
         inProcess.style.display = "none";
+        fileInput.disabled = false;
       }
     }
     // 画像表示
     function previewFile(file) {
-        /* FileReaderで読み込み、プレビュー画像を表示。 */
-        var fr = new FileReader();
-        fr.readAsDataURL(file);
-        fr.onload = function() {
-            var img = document.createElement('img');
-            img.width = document.body.clientWidth - 70;
-            img.setAttribute('src', fr.result);
-            preview.innerHTML = '';
-            preview.appendChild(img);
-        };
+      /* FileReaderで読み込み、プレビュー画像を表示。 */
+      var fr = new FileReader();
+      fr.readAsDataURL(file);
+      fr.onload = function() {
+        var img = document.createElement('img');
+        //img.width = document.body.clientWidth - 70;
+        img.width = 200;
+        img.setAttribute('src', fr.result);
+        preview.innerHTML = '';
+        preview.appendChild(img);
+      };
     }
     // API
     function api(file) {
