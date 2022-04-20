@@ -7,13 +7,17 @@
 </head>
 <body>
   <h1>AIスタジオアドバイザー</h1>
-  似たような雰囲気を撮影するスタジオをAIで調べます
+  似たような雰囲気を撮影するスタジオをAIで調べます。<br />
+  写真はサーバ上には残りません、ご心配ありません。<br />
     <div id="drop-zone" style="border: 1px solid; padding: 30px;">
       <p>ここに画像ファイルをドラッグ＆ドロップもしくは</p>
       <input type="file" name="file" id="file-input">
       <p />
       <div id="in-process" style="display:none;">
-        <h3><center style="color:white">少々時間がかかります</center></h3>
+        <center style="color:white">
+          <h3>解析中...しばらくお待ちください</h3>
+          <p>最大２分程度かかります<p>
+        </center>
       </div>
       <div id="preview"></div>
       <div id="retult-msg"></div>
@@ -125,6 +129,7 @@
         if (dt.length) {
           sum = {};
           for (var i = 0; i < dt.length; i++) {
+            console.log(dt[i][0], dt[i][1]);
             studio = dt[i][0];
             if (studio in sum) {
               sum[studio] += 10 - i
@@ -140,7 +145,7 @@
           var i = 0;
           for (var item of arr) {
             ++i;
-            console.log(item.key, item.value);
+            //console.log(item.key, item.value);
             if (item.value < 9) {
               break;
             }
