@@ -2,13 +2,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
   <title>AIスタジオアドバイザー</title>
 </head>
 <body>
   <h1>AIスタジオアドバイザー</h1>
-  似たような雰囲気を撮影するスタジオをAIで調べます。<br />
-  写真はサーバ上には残りません、ご心配ありません。<br />
+
+  フォトッチ掲載スタジオのインスタグラム画像を1000枚学習しています。<br />
+  お手持ちの写真を選択すると、
+  似たような雰囲気を撮影するスタジオをAIが紹介します。<br />
+  写真はサーバ上には残らないので、ご心配なくご利用ください。<br />
     <div id="drop-zone" style="border: 1px solid; padding: 30px;">
       <p>ここに画像ファイルをドラッグ＆ドロップもしくは</p>
       <input type="file" name="file" id="file-input">
@@ -123,6 +125,7 @@
       //var file = document.getElementById("file-input").files[0];
       params.append('image', file);
       // API呼び出し
+      //axios.post('https://photoai.azurewebsites.net/api/similar', params).then(function(response) {
       axios.post('/api/similar', params).then(function(response) {
         dt = response.data;
         var i = 0;
@@ -135,6 +138,9 @@
               sum[studio] += 10 - i
             } else {
               sum[studio] = 10 - i
+            }
+            if (dt[i][1] < 200) {
+              sum[studio] += 100;
             }
           }
           // キーを含んだ配列に変換 オブジェクト⇒配列
@@ -170,6 +176,7 @@
   
     }
   </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
 
 </body>
 </html>
