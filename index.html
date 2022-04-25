@@ -1,0 +1,182 @@
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>AIスタジオアドバイザー</title>
+</head>
+<body>
+  <h1>AIスタジオアドバイザー</h1>
+
+  フォトッチ掲載スタジオのインスタグラム画像を1000枚学習しています。<br />
+  お手持ちの写真を選択すると、
+  似たような雰囲気を撮影するスタジオをAIが紹介します。<br />
+  写真はサーバ上には残らないので、ご心配なくご利用ください。<br />
+    <div id="drop-zone" style="border: 1px solid; padding: 30px;">
+      <p>ここに画像ファイルをドラッグ＆ドロップもしくは</p>
+      <input type="file" name="file" id="file-input">
+      <p />
+      <div id="in-process" style="display:none;">
+        <center style="color:white">
+          <h3>解析中...しばらくお待ちください</h3>
+          <p>最大２分程度かかります<p>
+        </center>
+      </div>
+      <div id="preview"></div>
+      <div id="retult-msg"></div>
+    </div>
+
+  <script type="text/javascript">
+    const STABLE = {
+      'mitulle_studio'         : ['PhotoStudioミチュール 月島店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/TFz2yEj8SMaveK6WlNsd', 'PhotoStudioミチュール 有明ガーデン店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/eUE0rDl8FvbmBMLciIJq'],
+      'mitullephoto'           : ['PhotoStudioミチュール 月島ウォーターフロント店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/w94Ej1I6neuQplSRtGTD'],
+      'holidaysphotoservice'   : ['Holidays PhotoService', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/IQshrHKab7uPNtZqO1xY'],
+      'studiococoahitachi'     : ['スタジオCocoa 日立店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/yDnS0v6kYrlZTJKaIzum'],
+      'studiococoamito'        : ['スタジオCocoa 水戸店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/KjOT6loq1HJh52NeAwg3'],
+      'studiococoatsukuba'     : ['スタジオCocoa つくば店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/4yu9DjlYarJCgw6ESLo5'],
+      'studiococoakashiwa'     : ['スタジオCocoa 柏マルイ店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/proF2gKqWERa98OI47nY'],
+      'cocoainzai'             : ['スタジオCocoa 印西店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/VQup73vkfyHGsrODPKTX'],
+      'cocoatokyofutakotamagawa'   : ['スタジオCocoa 東京二子玉川店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/OMQBI2h9uWzxZjJykSCX'],
+      'cocoanoborito'          : ['スタジオCocoa 川崎登戸店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/hZDqtj8cVeN17TvxpHJf'],
+      'cocoashinkawasaki'      : ['スタジオCocoa 新川崎店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/wnmIkQa1vGq3chTp4t0j'],
+      'studiococoakohoku'      : ['スタジオCocoa 横浜港北店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/jvW2YkXuL0n614NSczIM'],
+      'cocoashinyokohama'      : ['スタジオCocoa 新横浜店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/1pTycokFS7LiPwl4EIJV'],
+      'cocoayokohamakonan'     : ['スタジオCocoa 横浜港南店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/l7EI61v9qJS3VKFPfdzx'],
+      'cocoayokohamatotsuka'   : ['スタジオCocoa 横浜戸塚店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/vpx8Pg0iorFGKqYjX9JC'],
+      'studiococoayamate'      : ['スタジオCocoa 横浜山手店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/H5a6ly4nKU8XTA3c9Cos'],
+      'adamasnewbornphoto'     : ['AdAmAs newborn photo', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/VYsNBtHZTIWJLQXh1mxR'],
+      'photostudiochelsea2524' : ['フォトスタジオチェルシー', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/15cDE0peYIGwPhFMg8Xt'],
+      'cafune_photostudio'     : ['Photo studio CAFUNÉ　カフネ ', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/WDc789dJ3BGQMsZFrtAx'],
+    }
+
+    const dropZone = document.getElementById('drop-zone');
+    const preview = document.getElementById('preview');
+    const fileInput = document.getElementById('file-input');
+    const inProcess = document.getElementById('in-process');
+
+    // ドラッグ領域に入ったら、背景に色をを付ける
+    dropZone.addEventListener('dragover', function(e) {
+      if (!fileInput.disabled) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.style.background = '#e1e7f0';
+      }
+    }, false);
+    // ドラッグ領域を離れたら、背景は白にする
+    dropZone.addEventListener('dragleave', function(e) {
+      if (!fileInput.disabled) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.style.background = '#ffffff';
+      }
+    }, false);
+    // ファイル選択したら
+    fileInput.addEventListener('change', function () {
+      if (!fileInput.disabled) {
+        previewFile(this.files[0]);
+        api(this.files[0]);
+      }
+    });
+    // ドロップしたら
+    dropZone.addEventListener('drop', function(e) {
+      if (!fileInput.disabled) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.style.background = '#ffffff'; // 背景色を白に戻す
+        var files = e.dataTransfer.files;  // ドロップしたファイルを取得
+        if (files.length > 1) return alert('アップロードできるファイルは1つだけです。');
+        fileInput.files = files;           // inputのvalueをドラッグしたファイルに置き換える。
+        previewFile(files[0]);
+        api(files[0]);
+      }
+    }, false);
+
+    // 実行中
+    function processing(f) {
+      if (f) {
+        document.body.style.background = '#616770';
+        dropZone.style.background = '#616770';
+        inProcess.style.display = "block";
+        fileInput.disabled = true;
+      } else {
+        document.body.style.background = '#ffffff';
+        dropZone.style.background = '#ffffff';
+        inProcess.style.display = "none";
+        fileInput.disabled = false;
+      }
+    }
+    // 画像表示
+    function previewFile(file) {
+      /* FileReaderで読み込み、プレビュー画像を表示。 */
+      var fr = new FileReader();
+      fr.readAsDataURL(file);
+      fr.onload = function() {
+        var img = document.createElement('img');
+        //img.width = document.body.clientWidth - 70;
+        img.width = 200;
+        img.setAttribute('src', fr.result);
+        preview.innerHTML = '';
+        preview.appendChild(img);
+      };
+    }
+    // API
+    function api(file) {
+      processing(true);
+      var params = new FormData();
+      //var file = document.getElementById("file-input").files[0];
+      params.append('image', file);
+      // API呼び出し
+      axios.post('https://photoai.azurewebsites.net/api/similar', params).then(function(response) {
+      //axios.post('/api/similar', params).then(function(response) {
+        dt = response.data;
+        var i = 0;
+        if (dt.length) {
+          sum = {};
+          for (var i = 0; i < dt.length; i++) {
+            console.log(dt[i][0], dt[i][1]);
+            studio = dt[i][0];
+            if (studio in sum) {
+              sum[studio] += 10 - i
+            } else {
+              sum[studio] = 10 - i
+            }
+            if (dt[i][1] < 200) {
+              sum[studio] += 100;
+            }
+          }
+          // キーを含んだ配列に変換 オブジェクト⇒配列
+          var arr = Object.keys(sum).map((k)=>({ key: k, value: sum[k] }));
+          // スコア順
+          arr.sort((a, b) => b.value - a.value);
+          var retultmsg = "<h3>調査結果</h3>";
+          var i = 0;
+          for (var item of arr) {
+            ++i;
+            //console.log(item.key, item.value);
+            if (item.value < 9) {
+              break;
+            }
+            if (STABLE[item.key].length == 2) {
+              retultmsg += '<a href="' + STABLE[item.key][1] + '">' + i + ' ' + STABLE[item.key][0] + '</a><br />';
+            } else {
+              retultmsg += '<a href="' + STABLE[item.key][1] + '">' + i + ' ' + STABLE[item.key][0] + '</a><br />';
+              retultmsg += '<a href="' + STABLE[item.key][3] + '">' + STABLE[item.key][2] + '</a><br />';
+            }
+          }
+
+          document.getElementById("retult-msg").innerHTML = retultmsg;
+          processing(false);
+        } else {
+          alert("データ取得できません");
+          processing(false);
+        }
+      }).catch(function(error) {
+        alert("エラー:" + error);
+        processing(false);
+      });
+  
+    }
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
+
+</body>
+</html>
