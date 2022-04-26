@@ -9,6 +9,7 @@ import os
 
 DTFILE = 'data.dat'
 
+print('@@ 起動')
 def load(filename):
     feature_list=[]
     try:
@@ -72,9 +73,14 @@ def makelist(feature_list):
     pass
 
 # 保存解析データをロード
+print('@@ 保存解析データをロード 開始')
 feature_list = load(DTFILE)
+print('@@ 保存解析データをロード 完了')
+
 # 学習済みデータをロード
+print('@@ 学習済みデータをロード 開始')
 model = InceptionResNetV2(weights='imagenet', include_top=False)
+print('@@ 学習済みデータをロード 完了')
 # 画像を解析
 #makelist(feature_list)
 #save(DTFILE)
@@ -85,6 +91,7 @@ CORS(app)
 # robots.txt
 @app.route('/robots.txt')
 def robots():
+    print("** /robots.txt")
     response = make_response(open('./static/robots.txt').read())
     response.headers["Content-type"] = "text/plain"
     return response
@@ -92,6 +99,7 @@ def robots():
 # sitemap.xml
 @app.route('/sitemap.xml')
 def sitemap():
+    print("** /sitemap.xml")
     response = make_response(open('./static/sitemap.xml').read())
     response.headers["Content-type"] = "text/plain"
     return response
@@ -99,11 +107,13 @@ def sitemap():
 # トップページ
 @app.route('/')
 def root():
+    print("** /")
     return render_template('index.html')
 
 # トップページ
 @app.route('/index.html')
 def index():
+    print("** /index.html")
     return render_template('index.html')
 
 @app.route("/api/similar", methods=['POST'])
@@ -151,4 +161,6 @@ def api():
 
 
 if __name__ == '__main__':
+  print('@@ Flask起動 開始')
   app.run(debug=True)
+  print('@@ Flask起動 完了')
