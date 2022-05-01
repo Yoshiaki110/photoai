@@ -20,13 +20,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <h1>（お試し）AIスタジオアドバイザー</h1>
 
   東京近郊のお子様向けフォトスタジオのインスタグラムの画像を大量に解析しています。<br />
-  お手持ちの写真を選択すると、
-  似たような雰囲気を撮影するスタジオをAIが紹介します。<br />
+  写真を選択して「解析開始」ボタンを押すと、似たような雰囲気を撮影するスタジオをAIが紹介します。<br />
+  ご自分の写真を利用できます、ここに画像ファイルをドラッグ＆ドロップしてください<br />
   写真はサーバ上には残らないので、ご心配なくご利用ください。<br />
   精度が不安定なのでお試しで運用中です。<br />
     <div id="drop-zone" style="border: 1px solid; padding: 10px;">
-      <p>ここに画像ファイルをドラッグ＆ドロップもしくは</p>
-      <input type="file" name="file" id="file-input">
+      <button id="button" onclick="moveSample(-1)">≪</button>
+      <img id="sample1" width="130" height="90" onclick="selectSample(0)"></canvas>
+      <img id="sample2" width="130" height="90" onclick="selectSample(1)"></canvas>
+      <button id="button" onclick="moveSample(1)">≫</button>
+      <p>画像を選択、または、画像ファイルをドラッグ＆ドロップもしくは</p>
+      <input type="file" name="file" id="file-input"><br />
       <div id="in-process" style="display:none;">
         <center style="color:white">
           <h3>解析中...しばらくお待ちください</h3>
@@ -69,19 +73,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       'photostudiochelsea2524' : ['フォトスタジオチェルシー', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/15cDE0peYIGwPhFMg8Xt'],
       'cafune_photostudio'     : ['Photo studio CAFUNÉ　カフネ ', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/WDc789dJ3BGQMsZFrtAx'],
     }
-
+    const SAMPLE = [
+      '92698_s.jpg',
+      '92798_s.jpg',
+      '1175652_s.jpg',
+      '1381834_s.jpg',
+      '22615772_s.jpg',
+      '23614597_s.jpg',
+      '4864254_s.jpg',
+      '4864415_s.jpg',
+      '4864470_s.jpg'
+    ]
+    const sample1 = document.getElementById('sample1');
+    const sample2 = document.getElementById('sample2');
     const dropZone = document.getElementById('drop-zone');
     const preview = document.getElementById('preview');
     const fileInput = document.getElementById('file-input');
     const button = document.getElementById('button');
     const inProcess = document.getElementById('in-process');
+    const retultMsg = document.getElementById('retult-msg');
     const red = document.getElementById('red');
     const green = document.getElementById('green');
     const blue = document.getElementById('blue');
     const ctx = preview.getContext('2d');
-    var selectFile = '';
     var imageData = null;
     var saveImageData = [];
+    var sampleIdx = 0;
 
     // ドラッグ領域に入ったら、背景に色をを付ける
     dropZone.addEventListener('dragover', function(e) {
@@ -103,7 +120,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     fileInput.addEventListener('change', function () {
       if (!fileInput.disabled) {
         previewFile(this.files[0]);
-        selectFile = this.files[0];
       }
     });
     // ドロップしたら
@@ -116,10 +132,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (files.length > 1) return alert('アップロードできるファイルは1つだけです。');
         fileInput.files = files;           // inputのvalueをドラッグしたファイルに置き換える。
         previewFile(files[0]);
-        selectFile = files[0];
       }
     }, false);
 
+    // サンプル画面
+    function showSample() {
+      var i = sampleIdx + 1;
+      if (i >= SAMPLE.length) {
+        i = 0;
+      }
+      sample1.setAttribute('src', '/static/sample/' + SAMPLE[sampleIdx]);
+      sample2.setAttribute('src', '/static/sample/' + SAMPLE[i]);
+    }
+    // サンプル画面移動
+    function moveSample(n) {
+      sampleIdx += n;
+      if (sampleIdx < 0) {
+        sampleIdx = SAMPLE.length -1;
+      }
+      if (sampleIdx >= SAMPLE.length) {
+        sampleIdx = 0;
+      }
+      showSample();
+    }
+    // サンプル画面選択
+    function selectSample(n) {
+      var img = n == 0 ? sample1 : sample2;
+      preview.width = 360;
+      preview.height = Math.floor(img.height * 360 / img.width);
+      ctx.drawImage(img, 0, 0, preview.width, preview.height);
+      imageData = ctx.getImageData(0, 0, preview.width, preview.height);
+      for (var i = 0; i <= preview.width * preview.height * 4; i++) {
+        saveImageData[i] = imageData.data[i];
+      }
+      color();               // 色味変更
+    }
     // 実行中画面
     function processing(f) {
       if (f) {
@@ -166,12 +213,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     // 解析API
     function api() {
-      if (selectFile == '') {
+      if (saveImageData.length == 0) {
         return;
       }
       processing(true);
       var params = new FormData();
-      //params.append('image', selectFile);
       var base64_png = preview.toDataURL("image/png");
       params.append('image', base64_png);
       // API呼び出し
@@ -212,7 +258,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
           }
 
-          document.getElementById("retult-msg").innerHTML = retultmsg;
+          retultMsg.innerHTML = retultmsg;
           processing(false);
         } else {
           alert("データ取得できません");
@@ -233,6 +279,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       });
     }
     dummy();       // サーバを起動
+    showSample();
   </script>
 
 </body>
