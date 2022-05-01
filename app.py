@@ -6,6 +6,9 @@ from keras.applications.inception_resnet_v2 import InceptionResNetV2, preprocess
 import numpy as np
 import pickle
 import os
+import base64
+from PIL import Image
+from io import BytesIO
 
 DTFILE = 'data.dat'
 
@@ -118,6 +121,22 @@ def index():
 
 @app.route("/api/similar", methods=['POST'])
 def api_similar():
+    print("** /api/similar start")
+    base64_png = request.form['image']
+    code = base64.b64decode(base64_png.split(',')[1])  # remove header
+    image_decoded = Image.open(BytesIO(code))
+    fname = os.path.join('./', 'image.png')
+    image_decoded.save(fname)
+    # 解析データを保存
+    feature = get_feature(fname)
+    # 確認
+    list = get_nearlist(feature_list, feature)
+    print("** /api/similar end")
+
+    return jsonify(list)
+
+@app.route("/api/similar2", methods=['POST'])
+def api_similar2():
     print("** /api/similar start")
     img = request.files['image']
     name = img.filename

@@ -19,26 +19,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
   <h1>（お試し）AIスタジオアドバイザー</h1>
 
-  お子様向けフォトスタジオのインスタグラムの画像を大量に解析しています。<br />
+  東京近郊のお子様向けフォトスタジオのインスタグラムの画像を大量に解析しています。<br />
   お手持ちの写真を選択すると、
   似たような雰囲気を撮影するスタジオをAIが紹介します。<br />
   写真はサーバ上には残らないので、ご心配なくご利用ください。<br />
   精度が不安定なのでお試しで運用中です。<br />
-    <div id="drop-zone" style="border: 1px solid; padding: 30px;">
+    <div id="drop-zone" style="border: 1px solid; padding: 10px;">
       <p>ここに画像ファイルをドラッグ＆ドロップもしくは</p>
       <input type="file" name="file" id="file-input">
-      <p />
       <div id="in-process" style="display:none;">
         <center style="color:white">
           <h3>解析中...しばらくお待ちください</h3>
           <p>最大３分程度かかります<p>
         </center>
       </div>
-      <div id="preview"></div>
+      <canvas id="preview"></canvas>
+      <p>
+      <input type="range" id="red" min="-55" max="55" step="5" onchange="color()">
+      <input type="range" id="green" min="-55" max="55" step="5" onchange="color()">
+      <input type="range" id="blue" min="-55" max="55" step="5" onchange="color()">
+      </p>
+      <button id="button" onclick="api()">解析開始</button>
+      <p />
       <div id="retult-msg"></div>
     </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
   <script type="text/javascript">
+    //const SERVER = '';
+    const SERVER = 'https://photoai.azurewebsites.net';
     const STABLE = {
       'mitulle_studio'         : ['PhotoStudioミチュール 月島店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/TFz2yEj8SMaveK6WlNsd', 'PhotoStudioミチュール 有明ガーデン店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/eUE0rDl8FvbmBMLciIJq'],
       'mitullephoto'           : ['PhotoStudioミチュール 月島ウォーターフロント店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/w94Ej1I6neuQplSRtGTD'],
@@ -64,7 +73,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const dropZone = document.getElementById('drop-zone');
     const preview = document.getElementById('preview');
     const fileInput = document.getElementById('file-input');
+    const button = document.getElementById('button');
     const inProcess = document.getElementById('in-process');
+    const red = document.getElementById('red');
+    const green = document.getElementById('green');
+    const blue = document.getElementById('blue');
+    const ctx = preview.getContext('2d');
+    var selectFile = '';
+    var imageData = null;
+    var saveImageData = [];
 
     // ドラッグ領域に入ったら、背景に色をを付ける
     dropZone.addEventListener('dragover', function(e) {
@@ -86,7 +103,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     fileInput.addEventListener('change', function () {
       if (!fileInput.disabled) {
         previewFile(this.files[0]);
-        api(this.files[0]);
+        selectFile = this.files[0];
       }
     });
     // ドロップしたら
@@ -99,47 +116,66 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (files.length > 1) return alert('アップロードできるファイルは1つだけです。');
         fileInput.files = files;           // inputのvalueをドラッグしたファイルに置き換える。
         previewFile(files[0]);
-        api(files[0]);
+        selectFile = files[0];
       }
     }, false);
 
-    // 実行中
+    // 実行中画面
     function processing(f) {
       if (f) {
         document.body.style.background = '#616770';
         dropZone.style.background = '#616770';
         inProcess.style.display = "block";
         fileInput.disabled = true;
+        button.disabled = true;
       } else {
         document.body.style.background = '#ffffff';
         dropZone.style.background = '#ffffff';
         inProcess.style.display = "none";
         fileInput.disabled = false;
+        button.disabled = false;
       }
+    }
+    // 色味変更
+    function color() {
+      for (var i = 0; i <= preview.width * preview.height * 4; i += 4) {
+        imageData.data[i] = saveImageData[i] + Number(red.value);
+        imageData.data[i+1] = saveImageData[i+1] + Number(green.value);
+        imageData.data[i+2] = saveImageData[i+2] + Number(blue.value);
+      }
+      ctx.putImageData(imageData, 0, 0);
     }
     // 画像表示
     function previewFile(file) {
-      /* FileReaderで読み込み、プレビュー画像を表示。 */
       var fr = new FileReader();
       fr.readAsDataURL(file);
       fr.onload = function() {
         var img = document.createElement('img');
-        //img.width = document.body.clientWidth - 70;
-        img.width = 200;
         img.setAttribute('src', fr.result);
-        preview.innerHTML = '';
-        preview.appendChild(img);
+        img.onload = function() {
+          preview.width = 360;
+          preview.height = Math.floor(img.height * 360 / img.width);
+          ctx.drawImage(img, 0, 0, preview.width, preview.height);
+          imageData = ctx.getImageData(0, 0, preview.width, preview.height);
+          for (var i = 0; i <= preview.width * preview.height * 4; i++) {
+            saveImageData[i] = imageData.data[i];
+          }
+          color();               // 色味変更
+        };
       };
     }
-    // API
-    function api(file) {
+    // 解析API
+    function api() {
+      if (selectFile == '') {
+        return;
+      }
       processing(true);
       var params = new FormData();
-      //var file = document.getElementById("file-input").files[0];
-      params.append('image', file);
+      //params.append('image', selectFile);
+      var base64_png = preview.toDataURL("image/png");
+      params.append('image', base64_png);
       // API呼び出し
-      axios.post('https://photoai.azurewebsites.net/api/similar', params).then(function(response) {
-      //axios.post('/api/similar', params).then(function(response) {
+      axios.post(SERVER + '/api/similar', params).then(function(response) {
         dt = response.data;
         var i = 0;
         if (dt.length) {
@@ -186,10 +222,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         alert("エラー:" + error);
         processing(false);
       });
-  
     }
+
+    // DUMMY API
+    function dummy() {
+      axios.get(SERVER + '/robots.txt').then(function(response) {
+        ;
+      }).catch(function(error) {
+        alert("dummy エラー:" + error);
+      });
+    }
+    dummy();       // サーバを起動
   </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
 
 </body>
 </html>
+

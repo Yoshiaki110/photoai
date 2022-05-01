@@ -1,0 +1,3 @@
+User-Agent:*
+Disallow:/static/
+Sitemap:https://photoai.azurewebsites.net/sitemap.xml

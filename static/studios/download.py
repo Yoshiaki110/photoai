@@ -92,7 +92,7 @@ def alldownload():
   download('studiococoayamate')
   download('adamasnewbornphoto')
   download('photostudiochelsea2524')
-  
+  download('irodori.studio')
 
 alldownload()
 # 学習済みデータをロード
@@ -120,5 +120,6 @@ studiococoayamate       フォトスタジオcocoa横浜山手店
 adamasnewbornphoto      AdAmAs newbornphoto
 photostudiochelsea2524  フォトスタジオチェルシー
 cafune_photostudio      Photo studio CAFUNÉ
+irodori.studio          イロドリスタジオ
 
 '''
