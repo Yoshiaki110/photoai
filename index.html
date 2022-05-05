@@ -283,7 +283,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           div.classList.add('ezchild');
           var img = document.createElement('img');
           img.classList.add('ezimg');
-          img.src = './sample/' + SAMPLES[i];
+          img.src = SAMPLE_PATH + SAMPLES[i];
           img.setAttribute('onclick', "imgclick('" + ('chk' + i) + "');");
           img.setAttribute('id', 'img' + i);
           div.appendChild(img);
