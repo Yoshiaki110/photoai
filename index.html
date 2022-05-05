@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="フォトスタジオのインスタ画像をAIが学習、気に入った写真を選択すると同じ雰囲気の写真が撮影できるスタジオを紹介します。" />
+    <title>AIスタジオアドバイザー　あなたにピッタリのお子様向けフォトスタジオをAIが選択</title>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-553874Q');</script>
+<!-- End Google Tag Manager -->
+
+    <script type="text/javascript" src="https:////ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!-- ここから -->
+    <style>
+      .ezimg {
+        width: 300px;
+        height: auto;
+      }
+      .ezdiv {
+        margin: 5px;
+        padding: 5px;
+      }
+      .ezparent {
+        //background: lightblue;
+        display: flex;
+      }
+      .ezchild {
+        //background: lightgreen;
+        width: 300px;
+      }
+      @media screen and (max-width: 5000px) {
+        .ezparent {
+          flex-wrap: wrap;
+        }
+      }
+      @media screen and (max-width: 400px) {
+        .ezparent {
+          display: block;
+        }
+      }
+      .ezchild {/*親div*/
+        position: relative;/*相対配置*/
+      }
+      .ezchild input {
+        position: absolute;/*絶対配置*/
+        top: 15px;
+        right: 15px;
+      }
+      input[type="checkbox"]{
+        transform: scale(2);
+      }
+      .ezfooter {
+        position: fixed;            /* フッターを固定する */
+        bottom: 0;            /* 上部から配置の基準位置を決める */
+        left: 0;            /* 左から配置の基準位置を決める */
+        width: 100%;            /* フッターの横幅を指定する */
+        height: 45px;            /* フッターの高さを指定する */
+        padding: 5px;            /* フッター内側の余白を指定する(上下左右) */
+        //background-color: #31a9ee;            /* フッターの背景色を指定する */
+        color: #FFFFFF;            /* フッターのフォントの色を指定する */
+      }
+
+      /* モーダルCSS */
+      .ezmodalarea {
+        display: none;
+        position: fixed;
+        z-index: 10; /*サイトによってここの数値は調整 */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .ezmodalbg {
+        width: 100%;
+        height: 100%;
+        background-color: rgba(30,30,30,0.9);
+      }
+
+      .ezmodalwrapper {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform:translate(-50%,-50%);
+        width: 70%;
+        max-width: 500px;
+        padding: 10px 30px;
+        background-color: #fff;
+      }
+
+      .ezclosemodal {
+        position: absolute;
+        top: 0.5rem;
+        right: 1rem;
+        cursor: pointer;
+      }
+
+      #ezbrother {
+        display: none;
+      }
+    </style>
+    <!-- ここまで -->
+  </head>
+  <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-553874Q"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+    <h1>（お試し）AIスタジオアドバイザー</h1>
+    <!-- ここから -->
+    <div id='ezbrie'>
+      <h3>このページはInternet Explorerに対応しておりません。</h3>
+    </div>
+    <div id='ezbrother'>
+      東京近郊のお子様向けフォトスタジオのインスタグラムの画像を解析しています。<br />
+      写真を選択して「解析開始」ボタンを押すと、似たような雰囲気を撮影するスタジオをAIが紹介します。<br />
+      精度が不安定なのでお試しで運用中です。<br />
+    </div>
+
+    <div id="wrapper" class="ezdiv ezparent"></div>
+    <br />
+    <br />
+
+    <div class="ezfooter">
+      <input id="openModal" type="button" style="width:98%;padding:1px;font-size:20px;background-color:deepskyblue;" value="解 析 開 始" />
+    </div>
+
+    <!-- モーダルエリアここから -->
+    <section id="ezmodalarea" class="ezmodalarea">
+      <div id="ezmodalbg" class="ezmodalbg"></div>
+      <div class="ezmodalwrapper">
+        <div class="modalContents">
+          <h2>選択した写真のスタジオ</h2>
+          <span id="result">結果</span>
+        </div>
+        <div id="ezclosemodal" class="ezclosemodal">
+          ×
+        </div>
+      </div>
+    </section>
+    <!-- モーダルエリアここまで -->
+
+
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
+   <script>
+      const IMGCNT = 20;
+      const SAMPLES = [
+        '1175652_s.jpg', '1381834_s.jpg', '1492224_s.jpg', '1589176_s.jpg', '1726359_s.jpg',
+        '22425569_s.jpg', '22615749_s.jpg', '22615772_s.jpg', '22615828_s.jpg', '22743445_s.jpg',
+        '22743993_s.jpg', '22747500_s.jpg', '22904188_s.jpg', '2322569_s.jpg', '23297314_s.jpg',
+        '23338275_s.jpg', '23354624_s.jpg', '23376459_s.jpg', '23435064_s.jpg', '23515475_s.jpg',
+        '23534233_s.jpg', '23573716_s.jpg', '23597773_s.jpg', '23614597_s.jpg', '2400819_s.jpg',
+        '2405591_s.jpg', '3261952_s.jpg', '3407659_s.jpg', '3590035_s.jpg', '3642665_s.jpg',
+        '3907437_s.jpg', '4211739_s.jpg', '4211742_s.jpg', '4211769_s.jpg', '4211820_s.jpg',
+        '4212004_s.jpg', '4864254_s.jpg', '4864415_s.jpg', '4864470_s.jpg', '5135079_s.jpg',
+        '593418_s.jpg', '601410_s.jpg', '92698_s.jpg', '92730_s.jpg', '92798_s.jpg',
+      ]
+      const STABLE = {
+        'mitulle_studio'         : ['PhotoStudioミチュール 月島店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/TFz2yEj8SMaveK6WlNsd', 'PhotoStudioミチュール 有明ガーデン店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/eUE0rDl8FvbmBMLciIJq'],
+        'mitullephoto'           : ['PhotoStudioミチュール 月島ウォーターフロント店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/w94Ej1I6neuQplSRtGTD'],
+        'holidaysphotoservice'   : ['Holidays PhotoService', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/IQshrHKab7uPNtZqO1xY'],
+        'studiococoahitachi'     : ['スタジオCocoa 日立店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/yDnS0v6kYrlZTJKaIzum'],
+        'studiococoamito'        : ['スタジオCocoa 水戸店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/KjOT6loq1HJh52NeAwg3'],
+        'studiococoatsukuba'     : ['スタジオCocoa つくば店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/4yu9DjlYarJCgw6ESLo5'],
+        'studiococoakashiwa'     : ['スタジオCocoa 柏マルイ店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/proF2gKqWERa98OI47nY'],
+        'cocoainzai'             : ['スタジオCocoa 印西店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/VQup73vkfyHGsrODPKTX'],
+        'cocoatokyofutakotamagawa'   : ['スタジオCocoa 東京二子玉川店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/OMQBI2h9uWzxZjJykSCX'],
+        'cocoanoborito'          : ['スタジオCocoa 川崎登戸店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/hZDqtj8cVeN17TvxpHJf'],
+        'cocoashinkawasaki'      : ['スタジオCocoa 新川崎店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/wnmIkQa1vGq3chTp4t0j'],
+        'studiococoakohoku'      : ['スタジオCocoa 横浜港北店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/jvW2YkXuL0n614NSczIM'],
+        'cocoashinyokohama'      : ['スタジオCocoa 新横浜店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/1pTycokFS7LiPwl4EIJV'],
+        'cocoayokohamakonan'     : ['スタジオCocoa 横浜港南店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/l7EI61v9qJS3VKFPfdzx'],
+        'cocoayokohamatotsuka'   : ['スタジオCocoa 横浜戸塚店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/vpx8Pg0iorFGKqYjX9JC'],
+        'studiococoayamate'      : ['スタジオCocoa 横浜山手店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/H5a6ly4nKU8XTA3c9Cos'],
+        'adamasnewbornphoto'     : ['AdAmAs newborn photo', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/VYsNBtHZTIWJLQXh1mxR'],
+        'photostudiochelsea2524' : ['フォトスタジオチェルシー', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/15cDE0peYIGwPhFMg8Xt'],
+        'cafune_photostudio'     : ['Photo studio CAFUNÉ　カフネ ', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/WDc789dJ3BGQMsZFrtAx'],
+      }
+      //const SERVER = '';
+      //const SAMPLE_PATH = '/static/sample/'
+      const SERVER = 'https://photoai.azurewebsites.net';
+      const SAMPLE_PATH = './static/sample/'
+      var sum = {};
+      var processing = false;
+
+      // DUMMY API
+      function dummy() {
+        axios.get(SERVER + '/robots.txt').then(function(response) {
+          ;
+        }).catch(function(error) {
+          console.log("dummy エラー:", error);
+          alert("解析に時間がかかる場合があります");
+        });
+      }
+
+      // 解析API
+      function api(result, results) {
+        var id = results.shift();
+        const img = document.getElementById('img' + id);
+        var canvas = document.getElementById('preview');
+        var canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+//        result.appendChild(canvas);
+        var params = new FormData();
+        var base64_png = canvas.toDataURL("image/png");
+        params.append('image', base64_png);
+        // API呼び出し
+        axios.post(SERVER + '/api/similar', params).then(function(response) {
+          console.log('** /api/similar', id);
+          dt = response.data;
+          var i = 0;
+          if (dt.length) {
+            for (var i = 0; i < dt.length; i++) {
+              //console.log(dt[i][0], dt[i][1]);
+              studio = dt[i][0];
+              console.log('スコア', studio, 10 - i);
+              if (studio in sum) {
+                sum[studio] += 10 - i
+              } else {
+                sum[studio] = 10 - i
+              }
+            }
+            if (results.length) {
+              api(result, results);
+            } else {
+              // キーを含んだ配列に変換 オブジェクト⇒配列
+              var arr = Object.keys(sum).map((k)=>({ key: k, value: sum[k] }));
+              // スコア順
+              arr.sort((a, b) => b.value - a.value);
+              var retultmsg = "<h3>調査結果</h3>";
+              var i = 0;
+              for (var item of arr) {
+                ++i;
+                console.log('全スコア', item.key, item.value);
+                if (i > 4) {
+                  break;
+                }
+                if (STABLE[item.key].length == 2) {
+                  retultmsg += '<a href="' + STABLE[item.key][1] + '">' + i + ' ' + STABLE[item.key][0] + '</a><br />';
+                } else {
+                  retultmsg += '<a href="' + STABLE[item.key][1] + '">' + i + ' ' + STABLE[item.key][0] + '</a><br />';
+                  retultmsg += '<a href="' + STABLE[item.key][3] + '">' + STABLE[item.key][2] + '</a><br />';
+                }
+              }
+//              result.appendChild(canvas);
+              result.innerHTML = retultmsg;
+            }
+          } else {
+            alert("データ取得できません");
+          }
+        }).catch(function(error) {
+          alert("エラー:" + error);
+        });
+      }
+
+      // 画像をクリック
+      function imgclick(id) {
+        var chk = document.getElementById(id);
+        if (chk.checked) {
+          chk.checked = false;
+        } else {
+          chk.checked = true;
+        }
+      }
+
+      // 写真表示
+      function display() {
+        // ランダム
+        SAMPLES.sort(function() {
+          return Math.random() - 0.5;
+        });
+        for (var i = 0; i < IMGCNT; i++) {
+          var div = document.createElement('div');
+          div.classList.add('ezdiv');
+          div.classList.add('ezchild');
+          var img = document.createElement('img');
+          img.classList.add('ezimg');
+          img.src = './sample/' + SAMPLES[i];
+          img.setAttribute('onclick', "imgclick('" + ('chk' + i) + "');");
+          img.setAttribute('id', 'img' + i);
+          div.appendChild(img);
+          var input = document.createElement('input');
+          input.setAttribute('type', 'checkbox');
+          input.setAttribute('id', 'chk' + i);
+          div.appendChild(input);
+          document.getElementById('wrapper').appendChild(div);
+        }
+      }
+
+      // HTMLロード後、IEの確認
+      window.onload = function() {
+        var userAgent = window.navigator.userAgent.toLocaleLowerCase();
+        if (userAgent.indexOf('msie') != -1 || userAgent.indexOf('trident') != -1) {
+          ;
+        } else {
+          var ezbrother = document.getElementById('ezbrother');
+          ezbrother.style.display = 'block';
+          document.getElementById('ezbrie').style.display = 'none';
+          display()
+        }
+      }
+
+      // 結果のソート
+      function sortdesc(obj) {
+        var array = Object.keys(obj).map(function(k) {
+          return { key: k, value: obj[k] };
+        });
+        // 値の降順
+        array.sort(function(a, b) {
+          return b.value - a.value;
+        });
+        // 配列⇒オブジェクト　で元に戻す
+        obj = Object.assign({}, ...array.map(function(item){
+            return {[item.key]: item.value,};
+          }
+        ));
+        return obj;
+      }
+
+      // 解析開始ボタン
+      $('#openModal').click(function(){
+        var result = document.getElementById("result");
+        var cnt = 0;
+        var results = [];
+        for (var i = 0; i < IMGCNT; i++) {
+          if (document.getElementById("chk" + i).checked) {
+            //console.log(SAMPLES[i]);
+            results.push(i);
+          }
+        }
+        if (results.length == 0) {
+          result.textContent = "写真が選択されていません。";
+        } else if (results.length > 3) {
+          result.textContent = "写真は３枚以下で選択してください。";
+        } else {
+          console.log(results);
+          sum = {};
+          processing = true;
+          result.innerHTML = '<center><h3>解析中</h3></center>';
+          api(result, results);
+          processing = false;
+        }
+        $('#ezmodalarea').fadeIn();
+      });
+      $('#ezclosemodal, #ezmodalbg').click(function(){
+        if (!processing) {
+          $('#ezmodalarea').fadeOut();
+        }
+      });
+    </script>
+    <!-- ここまで -->
+  </body>
+</html>
