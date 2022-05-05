@@ -119,6 +119,12 @@ def index():
     print("** /index.html")
     return render_template('index.html')
 
+# analyzerページ
+@app.route('/analyzer.html')
+def analyzer():
+    print("** /analyzer.html")
+    return render_template('analyzer.html')
+
 @app.route("/api/similar", methods=['POST'])
 def api_similar():
     print("** /api/similar start")
@@ -131,8 +137,8 @@ def api_similar():
     feature = get_feature(fname)
     # 確認
     list = get_nearlist(feature_list, feature)
+    os.remove(fname)
     print("** /api/similar end")
-
     return jsonify(list)
 
 @app.route("/api/similar2", methods=['POST'])

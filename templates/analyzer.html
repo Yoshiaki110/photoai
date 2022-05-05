@@ -3,7 +3,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="フォトスタジオのインスタ画像をAIが学習、貴方の写真をアップすると同じ雰囲気の写真が撮影できるスタジオをチョイスします。" />
-  <title>AIスタジオアドバイザー　あなたにピッタリのお子様向けフォトスタジオをAIが選択</title>
+  <title>AIスタジオアナライザー　あなたにピッタリのお子様向けフォトスタジオをAIが選択</title>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -17,17 +17,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-553874Q"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-  <h1>（お試し）AIスタジオアドバイザー</h1>
+  <h1>（お試し）AIスタジオアナライザー</h1>
 
-  東京近郊のお子様向けフォトスタジオのインスタグラムの画像を大量に解析しています。<br />
+  東京近郊のお子様向けフォトスタジオのインスタグラムの画像を解析しています。<br />
   写真を選択して「解析開始」ボタンを押すと、似たような雰囲気を撮影するスタジオをAIが紹介します。<br />
   ご自分の写真を利用できます、ここに画像ファイルをドラッグ＆ドロップしてください<br />
   写真はサーバ上には残らないので、ご心配なくご利用ください。<br />
   精度が不安定なのでお試しで運用中です。<br />
     <div id="drop-zone" style="border: 1px solid; padding: 10px;">
       <button id="button" onclick="moveSample(-1)">≪</button>
-      <img id="sample1" width="130" height="90" onclick="selectSample(0)"></canvas>
-      <img id="sample2" width="130" height="90" onclick="selectSample(1)"></canvas>
+      <img id="sample1" width="130" height="90" onclick="selectSample(0)"></img>
+      <img id="sample2" width="130" height="90" onclick="selectSample(1)"></img>
       <button id="button" onclick="moveSample(1)">≫</button>
       <p>画像を選択、または、画像ファイルをドラッグ＆ドロップもしくは</p>
       <input type="file" name="file" id="file-input"><br />
@@ -50,8 +50,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
   <script type="text/javascript">
-    //const SERVER = '';
-    const SERVER = 'https://photoai.azurewebsites.net';
+    const SERVER = '';
+    const SAMPLE_PATH = '/static/sample/'
+    //const SERVER = 'https://photoai.azurewebsites.net';
+    //const SAMPLE_PATH = './static/sample/'
     const STABLE = {
       'mitulle_studio'         : ['PhotoStudioミチュール 月島店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/TFz2yEj8SMaveK6WlNsd', 'PhotoStudioミチュール 有明ガーデン店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/eUE0rDl8FvbmBMLciIJq'],
       'mitullephoto'           : ['PhotoStudioミチュール 月島ウォーターフロント店', 'https://ptcrsv.canon.jp/str/reserve/infoTarget/w94Ej1I6neuQplSRtGTD'],
@@ -135,14 +137,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
     }, false);
 
-    // サンプル画面
+    // サンプル画面表示
     function showSample() {
       var i = sampleIdx + 1;
       if (i >= SAMPLE.length) {
         i = 0;
       }
-      sample1.setAttribute('src', './static/sample/' + SAMPLE[sampleIdx]);
-      sample2.setAttribute('src', './static/sample/' + SAMPLE[i]);
+      sample1.setAttribute('src', SAMPLE_PATH + SAMPLE[sampleIdx]);
+      sample2.setAttribute('src', SAMPLE_PATH + SAMPLE[i]);
     }
     // サンプル画面移動
     function moveSample(n) {
@@ -155,9 +157,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
       showSample();
     }
-    // サンプル画面選択
-    function selectSample(n) {
-      var img = n == 0 ? sample1 : sample2;
+    // プレビュー画像表示
+    function showImage(img) {
       preview.width = 360;
       preview.height = Math.floor(img.height * 360 / img.width);
       ctx.drawImage(img, 0, 0, preview.width, preview.height);
@@ -166,6 +167,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         saveImageData[i] = imageData.data[i];
       }
       color();               // 色味変更
+    }
+    // サンプル画面選択
+    function selectSample(n) {
+      var img = n == 0 ? sample1 : sample2;
+      showImage(img);
     }
     // 実行中画面
     function processing(f) {
@@ -200,14 +206,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var img = document.createElement('img');
         img.setAttribute('src', fr.result);
         img.onload = function() {
-          preview.width = 360;
-          preview.height = Math.floor(img.height * 360 / img.width);
-          ctx.drawImage(img, 0, 0, preview.width, preview.height);
-          imageData = ctx.getImageData(0, 0, preview.width, preview.height);
-          for (var i = 0; i <= preview.width * preview.height * 4; i++) {
-            saveImageData[i] = imageData.data[i];
-          }
-          color();               // 色味変更
+          showImage(img);
         };
       };
     }
@@ -275,7 +274,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       axios.get(SERVER + '/robots.txt').then(function(response) {
         ;
       }).catch(function(error) {
-        alert("dummy エラー:" + error);
+        console.log("dummy エラー:", error);
+        alert("解析に時間がかかる場合があります");
       });
     }
     dummy();       // サーバを起動
