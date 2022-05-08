@@ -7,6 +7,7 @@ import numpy as np
 import pickle
 import os
 import base64
+import uuid
 from PIL import Image
 from io import BytesIO
 
@@ -131,7 +132,7 @@ def api_similar():
     base64_png = request.form['image']
     code = base64.b64decode(base64_png.split(',')[1])  # remove header
     image_decoded = Image.open(BytesIO(code))
-    fname = os.path.join('./', 'image.png')
+    fname = os.path.join('./', str(str(uuid.uuid4())) + '.png')
     image_decoded.save(fname)
     # 解析データを保存
     feature = get_feature(fname)
